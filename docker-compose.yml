@@ -1,45 +1,37 @@
-version: '3.1'
-
+version: '3.1' # Docker Compose File Format Version
 services:
-  springboot:
-    image: dockerhandson/spring-boot-mongo:latest
-    restart: always # This will be ignored if we deploy in docker swarm
-    environment:
-    - MONGO_DB_HOSTNAME=mongo
-    - MONGO_DB_USERNAME=devdb
-    - MONGO_DB_PASSWORD=devdb123
+  springapp:
+    image: badri/spring-boot-mango
+    container_name: springapp_cont
     ports:
-      - 8080:8080
-    working_dir: /opt/app
-    depends_on:
-      - mongo
+    - 8080:8080
+    environment:
+      MONGO_DB_HOSTNAME: mongodb
+      MONGO_DB_USERNAME: mongodevdb
+      MONGO_DB_PASSWORD: dev@1234
     networks:
-    - springappnetwork  
-    deploy:  # This will be considered only in docker swarm.
+    - flipkartbridge
+    depends_on:
+    - mongodb
+    deploy:
+      mode: replicated
       replicas: 2
       update_config:
         parallelism: 1
-        delay: 20s
+        delay: 10s
       restart_policy:
         condition: on-failure
-        delay: 10s
-        max_attempts: 5
-
-  mongo:
-    image: mongo
-    environment:
-    - MONGO_INITDB_ROOT_USERNAME=devdb
-    - MONGO_INITDB_ROOT_PASSWORD=devdb123
-    volumes:
-      - mongodb:/data/db
-    restart: always
-    networks:
-    - springappnetwork
-    
-volumes:
   mongodb:
-    external: true
-    
+    image: mongo
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongodevdb
+      MONGO_INITDB_ROOT_PASSWORD: dev@1234
+    networks:
+    - flipkartbridge
+    volumes:
+    - mongobkp:/data/db
+volumes:
+  mongobkp:
 networks:
-  springappnetwork:
-    external: true
+  flipkartbridge:
