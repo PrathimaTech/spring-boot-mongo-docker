@@ -19,8 +19,15 @@ services:
       update_config:
         parallelism: 1
         delay: 10s
+        failure_action: continue
+        monitor: 60s
+        max_failure_ratio: 0.3
       restart_policy:
         condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      placement:
+        constraints: [node.role == worker]       
   mongodb:
     image: mongo
     container_name: mongodb
@@ -31,6 +38,10 @@ services:
     - flipkartbridge
     volumes:
     - mongobkp:/data/db
+    deploy:
+      placement:
+        constraints: [node.role == worker]
+        #constraints: [node.role == manager]    
 volumes:
   mongobkp:
 networks:
